@@ -1,0 +1,8 @@
+# build output
+example/dist
+example/out
+example/.next
+
+# dependencies
+node_modules
+examples/node_modules
