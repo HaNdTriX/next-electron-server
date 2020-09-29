@@ -1,6 +1,6 @@
 {
   "name": "next-electron-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Serve static or dynamic pages using custom scheme",
   "main": "index.js",
   "repository": "https://github.com/HaNdTriX/next-electron-server",
