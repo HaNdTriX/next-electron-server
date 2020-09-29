@@ -24,6 +24,6 @@
     "react-dom": "^16.13.1"
   },
   "dependencies": {
-    "next-electron-server": "file:.."
+    "next-electron-server": "latest"
   }
 }

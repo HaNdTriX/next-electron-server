@@ -24,7 +24,7 @@ const getPath = async (pth) => {
   }
 };
 
-module.exports = async function serveNext(uri, config = {}) {
+module.exports = async function serveNextAt(uri, config = {}) {
   const {
     privileges = {},
     port = 3000,
