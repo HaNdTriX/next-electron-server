@@ -3,55 +3,48 @@ const path = require("path");
 const fs = require("fs").promises;
 const http = require("http");
 
-const getPath = async (pth) => {
-  try {
-    const cleanedPath = pth.replace(/\?.*/, "");
-    const result = await fs.stat(cleanedPath);
+module.exports = async function serveNextAt(uri, options = {}) {
+  // Parse scheme
+  const [, scheme, host] = uri.match(/^([\w-]*):\/\/(.*)$/i);
 
-    if (result.isFile()) {
-      return cleanedPath;
-    }
-
-    if (result.isDirectory()) {
-      return getPath(path.join(cleanedPath, "index.html"));
-    }
-  } catch (error) {
-    if ((error.code = "ENOENT")) {
-      const appPath = app.getAppPath();
-      return path.join(appPath, "./out/404.html");
-    }
-    console.error(error);
-  }
-};
-
-module.exports = async function serveNextAt(uri, config = {}) {
+  // Configure defaults
   const {
     privileges = {},
     port = 3000,
     dev = !app.isPackaged,
     outputDir = "./out",
-  } = config;
-  const [, scheme, host = "app"] = uri.match(/^([\w-]*):\/\/(.*)$/i);
+  } = options;
 
+  // Validate
   if (!scheme) {
-    const error = new Error(`Invalid scheme: ${scheme}`);
+    const error = new Error(`Invalid scheme: ${scheme} (${uri})`);
     throw error;
   }
 
+  if (!host) {
+    const error = new Error(`Invalid host: ${host} (${uri})`);
+    throw error;
+  }
+
+  // Register scheme
   protocol.registerSchemesAsPrivileged([
     {
       scheme,
       privileges: {
         standard: true,
         secure: true,
+        allowServiceWorkers: true,
         supportFetchAPI: true,
+        corsEnabled: true,
         ...privileges,
       },
     },
   ]);
 
-  app.on("ready", () => {
+  // Wait for app to be ready
+  app.once("ready", () => {
     if (dev) {
+      // Development: Serve Next.js using a proxy pointing the localhost:3000
       console.log(
         "\x1b[33m%s\x1b[0m",
         "next-electron-server:",
@@ -73,6 +66,7 @@ module.exports = async function serveNextAt(uri, config = {}) {
         }
       );
     } else {
+      // PRODUCTION: Serve Next.js files using a static handler
       const appPath = app.getAppPath();
       protocol.registerFileProtocol(scheme, async (request, respond) => {
         const indexPath = path.join(appPath, "index.html");
@@ -89,9 +83,9 @@ module.exports = async function serveNextAt(uri, config = {}) {
 };
 
 function waitForProxy(webpackDevServerUrl, options, next) {
-  // Proxy request
   const proxyReq = http.request(webpackDevServerUrl, options, next);
 
+  // Lets wait for the Next.js devserver to start
   proxyReq.on("error", function (error) {
     if (error.code === "ECONNREFUSED") {
       console.log(
@@ -107,4 +101,26 @@ function waitForProxy(webpackDevServerUrl, options, next) {
     }
   });
   proxyReq.end();
+}
+
+async function getPath(pth) {
+  try {
+    const cleanedPath = pth.replace(/\?.*/, "");
+    const result = await fs.stat(cleanedPath);
+
+    if (result.isFile()) {
+      return cleanedPath;
+    }
+
+    if (result.isDirectory()) {
+      return getPath(path.join(cleanedPath, "index.html"));
+    }
+  } catch (error) {
+    // Support Next.js 404 page:
+    if ((error.code = "ENOENT")) {
+      const appPath = app.getAppPath();
+      return path.join(appPath, "./out/404.html");
+    }
+    console.error(error);
+  }
 }
