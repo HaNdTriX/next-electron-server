@@ -82,13 +82,13 @@ The render page will always being served using the same protocol and url.
 
 ## API
 
-### serveNext(uri, options)
+### serveNextAt(uri, options)
 
 #### uri
 
 _Required_\
 Type: `string`\
-Example: `next://app`\
+Example: `next://app`
 
 The entrypoint of your Next.js app.
 
@@ -96,28 +96,28 @@ The entrypoint of your Next.js app.
 
 Type: `object`
 
-##### outputDir
+##### ↳ outputDir
 
 Type: `string`\
 Default: `"./out"`
 
 The directory to serve, relative to the app root directory.
 
-##### port
+##### ↳ port
 
 Type: `number`\
 Default: `3000`
 
 The port your Next.js devserver runs on.
 
-#### dev
+##### ↳ dev
 
 Type: `boolean`\
 Default `!app.isPackaged`
 
 This flag decides how to serve the files. When `dev === true` a proxy will be created pointing to `localhost:3000`.
 
-#### privileges
+##### ↳ privileges
 
 Type: `object`
 
