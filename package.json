@@ -1,9 +1,14 @@
 {
   "name": "next-electron-server",
   "version": "0.0.4",
-  "description": "Serve static or dynamic pages using custom scheme",
+  "description": "Serve your Next.js app inside Electron using a custom scheme.",
   "main": "index.js",
   "repository": "https://github.com/HaNdTriX/next-electron-server",
   "author": "handtrix <handtrix@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "electron",
+    "nextjs",
+    "react"
+  ]
 }
