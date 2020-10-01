@@ -17,12 +17,16 @@ module.exports = async function serveNextAt(uri, options = {}) {
 
   // Validate
   if (!scheme) {
-    const error = new Error(`Invalid scheme: ${scheme} (${uri})`);
+    const error = new Error(
+      `next-electron-server: Invalid scheme: ${scheme} (${uri})`
+    );
     throw error;
   }
 
   if (!host) {
-    const error = new Error(`Invalid host: ${host} (${uri})`);
+    const error = new Error(
+      `next-electron-server: Invalid host: ${host} (${uri})`
+    );
     throw error;
   }
 
