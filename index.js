@@ -48,6 +48,13 @@ module.exports = async function serveNextAt(uri, options = {}) {
   // Wait for app to be ready
   app.once("ready", () => {
     if (dev) {
+      if (isNaN(port)) {
+        const error = new Error(
+          `next-electron-server: "port" must be a number`
+        );
+        throw error;
+      }
+
       // Development: Serve Next.js using a proxy pointing the localhost:3000
       console.log(
         "\x1b[33m%s\x1b[0m",
@@ -57,29 +64,43 @@ module.exports = async function serveNextAt(uri, options = {}) {
       session.defaultSession.protocol.registerStreamProtocol(
         scheme,
         (request, next) => {
-          // Build proxy options
+          // Parse proxy options
           const { url, ...options } = request;
 
-          // Rewrite url
-          const webpackDevServerUrl = url
+          // Rewrite url to localhost localhost
+          const devServerUrl = url
             .replace(`${scheme}://${host}`, `http://localhost:${port}`)
             .replace(/\/$/, "");
 
           // Proxy request
-          waitForProxy(webpackDevServerUrl, options, next);
+          waitForProxy(devServerUrl, options, next);
         }
       );
     } else {
       // PRODUCTION: Serve Next.js files using a static handler
       const appPath = app.getAppPath();
       protocol.registerFileProtocol(scheme, async (request, respond) => {
-        const indexPath = path.join(appPath, "index.html");
+        // Get the requested filePath
         const filePath = path.join(
           appPath,
           request.url.replace(`${scheme}://${host}`, outputDir)
         );
+
+        // Try to resolve it
+        let resolvedPath = await resolvePath(filePath);
+
+        // If not found lets try to find it as .html file
+        if (!resolvedPath && !path.extname(filePath)) {
+          resolvedPath = await resolvePath(filePath + ".html");
+        }
+
+        // Snap the file doesn't exist. Lets render the Next.js 404
+        if (!resolvedPath) {
+          resolvedPath = path.join(appPath, outputDir, "./404.html");
+        }
+
         respond({
-          path: (await getPath(filePath)) || indexPath,
+          path: resolvedPath,
         });
       });
     }
@@ -99,7 +120,7 @@ function waitForProxy(webpackDevServerUrl, options, next) {
       );
       setTimeout(() => {
         waitForProxy(webpackDevServerUrl, options, next);
-      }, 1000);
+      }, 500);
     } else {
       throw error;
     }
@@ -107,7 +128,7 @@ function waitForProxy(webpackDevServerUrl, options, next) {
   proxyReq.end();
 }
 
-async function getPath(pth) {
+async function resolvePath(pth) {
   try {
     const cleanedPath = pth.replace(/\?.*/, "");
     const result = await fs.stat(cleanedPath);
@@ -117,14 +138,7 @@ async function getPath(pth) {
     }
 
     if (result.isDirectory()) {
-      return getPath(path.join(cleanedPath, "index.html"));
+      return resolvePath(path.join(cleanedPath, "index.html"));
     }
-  } catch (error) {
-    // Support Next.js 404 page:
-    if ((error.code = "ENOENT")) {
-      const appPath = app.getAppPath();
-      return path.join(appPath, "./out/404.html");
-    }
-    console.error(error);
-  }
+  } catch (_) {}
 }
