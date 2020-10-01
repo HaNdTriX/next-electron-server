@@ -18,14 +18,14 @@ module.exports = async function serveNextAt(uri, options = {}) {
   // Validate
   if (!scheme) {
     const error = new Error(
-      `next-electron-server: Invalid scheme: ${scheme} (${uri})`
+      `next-electron-server - Invalid scheme: ${scheme} (${uri})`
     );
     throw error;
   }
 
   if (!host) {
     const error = new Error(
-      `next-electron-server: Invalid host: ${host} (${uri})`
+      `next-electron-server - Invalid host: ${host} (${uri})`
     );
     throw error;
   }
@@ -50,7 +50,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
     if (dev) {
       if (isNaN(port)) {
         const error = new Error(
-          `next-electron-server: "port" must be a number`
+          `next-electron-server - "port" must be a number`
         );
         throw error;
       }
@@ -58,8 +58,8 @@ module.exports = async function serveNextAt(uri, options = {}) {
       // Development: Serve Next.js using a proxy pointing the localhost:3000
       console.log(
         "\x1b[33m%s\x1b[0m",
-        "next-electron-server:",
-        "Using development mode"
+        "next-electron-server",
+        `- Serving files via ${scheme}://${host} from http://localhost:${port}`
       );
       session.defaultSession.protocol.registerStreamProtocol(
         scheme,
@@ -115,8 +115,8 @@ function waitForProxy(webpackDevServerUrl, options, next) {
     if (error.code === "ECONNREFUSED") {
       console.log(
         "\x1b[33m%s\x1b[0m",
-        "next-electron-server:",
-        "Waiting for local dev server"
+        "next-electron-server",
+        "- Waiting for Next.js DevServer"
       );
       setTimeout(() => {
         waitForProxy(webpackDevServerUrl, options, next);
