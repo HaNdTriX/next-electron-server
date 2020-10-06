@@ -65,7 +65,7 @@ From my point of view this approach has many drawbacks.
 - Paths differ between production & development
 - 404 pages won't work in production
 
-Thats why I created `next-electron-server`.
+That's why I created `next-electron-server`.
 The render page will always being served using the same protocol and url.
 
 - In **development** is implements a proxy to `http://localhost:3000`.
