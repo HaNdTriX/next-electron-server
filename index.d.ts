@@ -1,3 +1,12 @@
+interface ElectronProtocolPrivileges {
+  standard?: boolean;
+  secure?: boolean;
+  stream?: boolean;
+  allowServiceWorkers?: boolean;
+  corsEnabled?: boolean;
+  supportFetchAPI?: boolean;
+}
+
 interface Options {
   /**
    * Port from the Next.js devserver
@@ -21,10 +30,10 @@ interface Options {
   dev?: boolean;
 
   /**
-   * Port from the Next.js devserver
-   * @default 3000
+   * Electron Protocol Priviliges
+   * @url https://www.electronjs.org/docs/api/protocol
    */
-  privileges?: any;
+  privileges?: ElectronProtocolPrivileges;
 }
 
 declare function serveNextAt(uri: string, options?: Options): void;
