@@ -74,8 +74,8 @@ The render page will always being served using the same protocol and url.
 ## Features
 
 - supports 404 pages
-- works with next devserver
-- waits for next devserver to start
+- works with Next.js dev-server
+- waits for Next.j dev-server to start
 - works with paths of images and other static resources
 - static paths won't differ between development and production
 - has zero dependencies
@@ -90,7 +90,7 @@ _Required_\
 Type: `string`\
 Example: `next://app`
 
-The entrypoint of your Next.js app.
+The entry-point of your Next.js app.
 
 #### options
 
@@ -108,7 +108,7 @@ The directory to serve, relative to the app root directory.
 Type: `number`\
 Default: `3000`
 
-The port your Next.js devserver runs on.
+The port your Next.js dev-server runs on.
 
 ##### ↳ dev
 
