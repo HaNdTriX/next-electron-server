@@ -1,4 +1,4 @@
-const { app, protocol, session } = require("electron");
+const { app, protocol } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 const http = require("http");
@@ -61,21 +61,18 @@ module.exports = async function serveNextAt(uri, options = {}) {
         "next-electron-server",
         `- Serving files via ${scheme}://${host} from http://localhost:${port}`
       );
-      session.defaultSession.protocol.registerStreamProtocol(
-        scheme,
-        (request, next) => {
-          // Parse proxy options
-          const { url, ...options } = request;
+      protocol.registerStreamProtocol(scheme, (request, next) => {
+        // Parse proxy options
+        const { url, ...options } = request;
 
-          // Rewrite url to localhost localhost
-          const devServerUrl = url
-            .replace(`${scheme}://${host}`, `http://localhost:${port}`)
-            .replace(/\/$/, "");
+        // Rewrite url to localhost localhost
+        const devServerUrl = url
+          .replace(`${scheme}://${host}`, `http://localhost:${port}`)
+          .replace(/\/$/, "");
 
-          // Proxy request
-          waitForProxy(devServerUrl, options, next);
-        }
-      );
+        // Proxy request
+        waitForProxy(devServerUrl, options, next);
+      });
     } else {
       // PRODUCTION: Serve Next.js files using a static handler
       const appPath = app.getAppPath();
