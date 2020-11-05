@@ -17,6 +17,9 @@ app.on("ready", async () => {
 
   // Load renderer using a custom protocol:
   mainWindow.loadURL("next://app");
+
+  // You can load deeplinks too (e.g: pages/about):
+  // mainWindow.loadURL("next://app/about");
 });
 
 // Quit the app once all windows are closed

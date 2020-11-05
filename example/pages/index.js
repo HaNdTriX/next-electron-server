@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function IndexPage() {
   const [input, setInput] = useState("");
@@ -34,10 +35,12 @@ export default function IndexPage() {
 
       <ul>
         <li>
-          <a href="/about">About</a>
+          <Link href="/about">
+            <a>About</a>
+          </Link>
         </li>
         <li>
-          <a href="/invalid">Invalid</a>
+          <a href="/invalid">Invalid (triggers 404)</a>
         </li>
       </ul>
     </>

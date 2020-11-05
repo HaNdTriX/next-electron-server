@@ -6,7 +6,9 @@ export default function AboutPage() {
       <h1>About Page</h1>
       <ul>
         <li>
-          <a href="/">Index</a>
+          <Link href="/">
+            <a>Index</a>
+          </Link>
         </li>
       </ul>
     </>

@@ -7,7 +7,10 @@ module.exports = {
       {
         "preset-env": {
           targets: {
-            electron: devDependencies.electron.replace(/^\^|~/, ""),
+            // Babel Env needs to upgrade electron-to-chromium
+            // for the following line to work with electron > 7:
+            // electron: devDependencies.electron.replace(/^\^|~/, ""),
+            electron: 7,
           },
         },
       },
