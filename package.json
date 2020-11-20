@@ -1,6 +1,6 @@
 {
   "name": "next-electron-server",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Serve your Next.js app inside Electron using a custom scheme.",
   "main": "index.js",
   "repository": "https://github.com/HaNdTriX/next-electron-server",
