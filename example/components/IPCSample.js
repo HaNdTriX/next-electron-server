@@ -6,16 +6,16 @@ export default function IPCSample() {
 
   useEffect(() => {
     const handleMessage = (event, message) => setMessage(message);
-    global.ipcRenderer.on("message", handleMessage);
-
+    // Check out `main/preload.js` for more info
+    window.electron.message.on(handleMessage);
     return () => {
-      global.ipcRenderer.removeListener("message", handleMessage);
+      window.electron.message.off(handleMessage);
     };
   }, []);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    global.ipcRenderer.send("message", input);
+    window.electron.message.send(input);
     setMessage(null);
   };
 
