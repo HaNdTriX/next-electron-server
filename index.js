@@ -45,7 +45,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
   ]);
 
   // Wait for app to be ready
-  app.once("ready", () => {
+  app.whenReady().then(() => {
     if (dev) {
       if (isNaN(port)) {
         const error = new Error(
