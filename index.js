@@ -111,7 +111,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
 
         // If not found lets try to find it as .html file
         if (!resolvedPath && !path.extname(filePath)) {
-          resolvedPath = await resolvePath(filePath + ".html");
+          resolvedPath = await resolvePath(filePath, ".html");
         }
 
         // Snap the file doesn't exist. Lets render the Next.js 404
@@ -148,9 +148,14 @@ function cloneAndRetryRequest(options, next) {
     .end();
 }
 
-async function resolvePath(pth) {
+async function resolvePath(pth, ext) {
   try {
-    const cleanedPath = pth.replace(/\?.*/, "");
+    let cleanedPath = pth.replace(/\?.*/, "");
+
+    if(ext){
+      cleanedPath += ext;
+    }
+
     const result = await fs.stat(cleanedPath);
 
     if (result.isFile()) {
