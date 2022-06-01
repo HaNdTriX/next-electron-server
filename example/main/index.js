@@ -5,7 +5,7 @@ const serveNext = require("next-electron-server");
 // Register your own scheme and host
 serveNext("next://app");
 
-app.on("ready", async () => {
+app.whenReady().then(async () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
