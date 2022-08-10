@@ -123,6 +123,13 @@ Type: `object`
 
 Check out [electron/docs/protocol](https://www.electronjs.org/docs/api/protocol#protocolregisterschemesasprivilegedcustomschemes) for more infos about this config object.
 
+##### ↳ partition
+
+Type: `string`
+Default: [`electron.session.defaultSession`](https://www.electronjs.org/docs/latest/api/session#sessiondefaultsession)
+
+The partition the protocol should be installed to, if you're not using Electron's default partition.
+
 ## Contributing
 
 1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device

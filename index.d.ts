@@ -34,6 +34,12 @@ interface Options {
    * @url https://www.electronjs.org/docs/api/protocol
    */
   privileges?: ElectronProtocolPrivileges;
+
+  /**
+   * The partition the protocol should be installed to, if you're not using Electron's default partition.
+   * @default electron.session.defaultSession
+   */
+  partition?: string;
 }
 
 declare function serveNextAt(uri: string, options?: Options): void;

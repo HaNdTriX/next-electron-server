@@ -1,4 +1,4 @@
-const { app, protocol } = require("electron");
+const { app, protocol, session } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 const http = require("http");
@@ -13,6 +13,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
     port = 3000,
     dev = !app.isPackaged,
     outputDir = "./out",
+    partition,
   } = options;
 
   // Validate
@@ -46,6 +47,10 @@ module.exports = async function serveNextAt(uri, options = {}) {
 
   // Wait for app to be ready
   app.whenReady().then(() => {
+    const { protocol } = partition
+      ? session.fromPartition(options.partition)
+      : session.defaultSession;
+
     if (dev) {
       if (isNaN(port)) {
         const error = new Error(
