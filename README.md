@@ -125,7 +125,7 @@ Check out [electron/docs/protocol](https://www.electronjs.org/docs/api/protocol#
 
 ##### ↳ partition
 
-Type: `string`
+Type: `string`\
 Default: [`electron.session.defaultSession`](https://www.electronjs.org/docs/latest/api/session#sessiondefaultsession)
 
 The partition the protocol should be installed to, if you're not using Electron's default partition.
