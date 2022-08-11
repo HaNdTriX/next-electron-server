@@ -48,7 +48,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
   // Wait for app to be ready
   app.whenReady().then(() => {
     const { protocol } = partition
-      ? session.fromPartition(options.partition)
+      ? session.fromPartition(partition)
       : session.defaultSession;
 
     if (dev) {
@@ -75,7 +75,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
           .replace(/\/$/, "");
 
         // Proxy request
-        waitForProxy(devServerUrl, options, next);
+        lazyProxyRequest(devServerUrl, options, next);
       });
     } else {
       // PRODUCTION: Serve Next.js files using a static handler
@@ -108,25 +108,28 @@ module.exports = async function serveNextAt(uri, options = {}) {
   });
 };
 
-function waitForProxy(webpackDevServerUrl, options, next) {
-  const proxyReq = http.request(webpackDevServerUrl, options, next);
+function lazyProxyRequest(webpackDevServerUrl, options, next) {
+  return http
+    .request(webpackDevServerUrl, options, next)
+    .on("error", async (error) => {
+      // Lets wait for the Next.js devserver to start
+      if (error.code === "ECONNREFUSED") {
+        console.log(
+          "\x1b[33m%s\x1b[0m",
+          "next-electron-server",
+          "- Waiting for Next.js DevServer"
+        );
 
-  // Lets wait for the Next.js devserver to start
-  proxyReq.on("error", function (error) {
-    if (error.code === "ECONNREFUSED") {
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        "next-electron-server",
-        "- Waiting for Next.js DevServer"
-      );
-      setTimeout(() => {
-        waitForProxy(webpackDevServerUrl, options, next);
-      }, 500);
-    } else {
-      throw error;
-    }
-  });
-  proxyReq.end();
+        // Next devserver is not ready yet, lets wait for it
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Retry
+        lazyProxyRequest(webpackDevServerUrl, options, next);
+      } else {
+        throw error;
+      }
+    })
+    .end();
 }
 
 async function resolvePath(pth) {
