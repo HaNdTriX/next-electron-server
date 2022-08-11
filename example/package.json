@@ -26,5 +26,8 @@
   },
   "dependencies": {
     "next-electron-server": "latest"
-  }
+  },
+  "browserslist": [
+    "Electron ^20.0.1"
+  ]
 }
