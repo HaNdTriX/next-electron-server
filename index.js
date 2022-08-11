@@ -16,6 +16,11 @@ module.exports = async function serveNextAt(uri, options = {}) {
     partition,
   } = options;
 
+  // Expose the server port and dev flag as en environment variable
+  // This allows us to dynamically expose the port to the preload script
+  process.env.NEXT_ELECTON_SERVER_PORT = port;
+  process.env.NEXT_ELECTON_SERVER_DEV = dev;
+
   // Validate
   if (!scheme) {
     const error = new Error(
