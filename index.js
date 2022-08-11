@@ -43,6 +43,7 @@ module.exports = async function serveNextAt(uri, options = {}) {
       privileges: {
         standard: true,
         secure: true,
+        allowServiceWorkers: true,
         supportFetchAPI: true,
         corsEnabled: true,
         ...privileges,
