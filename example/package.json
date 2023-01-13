@@ -17,10 +17,10 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^7.3.0",
-    "electron": "^20.0.1",
-    "electron-builder": "^23.3.3",
-    "next": "^12.2.4",
+    "concurrently": "^7.6.0",
+    "electron": "^22.0.2",
+    "electron-builder": "^23.6.0",
+    "next": "^13.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
