@@ -15,11 +15,6 @@ module.exports = async function serveNextAt(uri, options = {}) {
     partition,
   } = options;
 
-  // Expose the server port and dev flag as en environment variable
-  // This allows us to dynamically expose the port to the preload script
-  process.env.NEXT_ELECTON_SERVER_PORT = port;
-  process.env.NEXT_ELECTON_SERVER_DEV = dev;
-
   // Validate
   if (!scheme) {
     const error = new Error(
@@ -70,17 +65,53 @@ module.exports = async function serveNextAt(uri, options = {}) {
         "next-electron-server",
         `- Serving files via ${scheme}://${host} from http://localhost:${port}`
       );
-      protocol.registerStreamProtocol(scheme, ({ url, ...request }, next) => {
+
+      protocol.registerStreamProtocol(scheme, (request, next) => {
+        const patchedRequest = {
+          ...request,
+          url: request.url
+            .replace(`${scheme}://${host}`, `http://localhost:${port}`)
+            .replace(/\/$/, ""),
+        };
+
+        // Patch Next.js webpack.js to fix the hmr client url
+        if (
+          patchedRequest.url.includes(`:${port}/_next/static/chunks/webpack.js`)
+        ) {
+          console.log(
+            "\x1b[33m%s\x1b[0m",
+            "next-electon-server",
+            "- Patching _next/static/chunks/webpack.js"
+          );
+          return cloneAndRetryRequest(patchedRequest, (response) => {
+            const { PassThrough } = require("stream");
+            const stream = new PassThrough();
+
+            // Patch the webpack.js file to fix the hmr client url:
+            // We do this, by adding a Websocket proxy that fixes the url
+            // to the top of the response body
+            stream.push(`
+              Object.defineProperty(globalThis, 'WebSocket', {
+                value: new Proxy(WebSocket, {
+                  construct: (Target, [url, protocols]) => {
+                    if (url.endsWith('/_next/webpack-hmr')) {
+                      // Fix the Next.js hmr client url
+                      return new Target("ws://localhost:${port}/_next/webpack-hmr", protocols)
+                    } else {
+                      return new Target(url, protocols)
+                    }
+                  }
+                })
+              });
+            `);
+
+            response.pipe(stream);
+            next(stream);
+          });
+        }
+
         // Proxy request
-        cloneAndRetryRequest(
-          {
-            ...request,
-            url: url
-              .replace(`${scheme}://${host}`, `http://localhost:${port}`)
-              .replace(/\/$/, ""),
-          },
-          next
-        );
+        return cloneAndRetryRequest(patchedRequest, next);
       });
     } else {
       // PRODUCTION: Serve Next.js files using a static handler
