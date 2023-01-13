@@ -6,19 +6,13 @@ export default function Navigation() {
       <h2>Navigation</h2>
       <ul>
         <li>
-          <Link href="/">
-            <a>Index</a>
-          </Link>
+          <Link href="/">Index</Link>
         </li>
         <li>
-          <Link href="/about">
-            <a>About</a>
-          </Link>
+          <Link href="/about">About</Link>
         </li>
         <li>
-          <Link href="/invalid">
-            <a>Invalid (404)</a>
-          </Link>
+          <Link href="/invalid">Invalid (404)</Link>
         </li>
       </ul>
     </>

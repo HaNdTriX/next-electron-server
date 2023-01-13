@@ -1,7 +1,6 @@
-const { app, protocol, session } = require("electron");
+const { app, net, protocol, session } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
-const http = require("http");
 
 module.exports = async function serveNextAt(uri, options = {}) {
   // Parse scheme
@@ -71,17 +70,17 @@ module.exports = async function serveNextAt(uri, options = {}) {
         "next-electron-server",
         `- Serving files via ${scheme}://${host} from http://localhost:${port}`
       );
-      protocol.registerStreamProtocol(scheme, (request, next) => {
-        // Parse proxy options
-        const { url, ...options } = request;
-
-        // Rewrite url to localhost localhost
-        const devServerUrl = url
-          .replace(`${scheme}://${host}`, `http://localhost:${port}`)
-          .replace(/\/$/, "");
-
+      protocol.registerStreamProtocol(scheme, ({ url, ...request }, next) => {
         // Proxy request
-        lazyProxyRequest(devServerUrl, options, next);
+        cloneAndRetryRequest(
+          {
+            ...request,
+            url: url
+              .replace(`${scheme}://${host}`, `http://localhost:${port}`)
+              .replace(/\/$/, ""),
+          },
+          next
+        );
       });
     } else {
       // PRODUCTION: Serve Next.js files using a static handler
@@ -114,9 +113,10 @@ module.exports = async function serveNextAt(uri, options = {}) {
   });
 };
 
-function lazyProxyRequest(webpackDevServerUrl, options, next) {
-  return http
-    .request(webpackDevServerUrl, options, next)
+function cloneAndRetryRequest(options, next) {
+  return net
+    .request(options)
+    .on("response", next)
     .on("error", async (error) => {
       // Lets wait for the Next.js devserver to start
       if (error.code === "ECONNREFUSED") {
@@ -130,7 +130,7 @@ function lazyProxyRequest(webpackDevServerUrl, options, next) {
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Retry
-        lazyProxyRequest(webpackDevServerUrl, options, next);
+        cloneAndRetryRequest(options, next);
       } else {
         throw error;
       }
