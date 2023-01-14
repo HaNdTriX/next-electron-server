@@ -4,7 +4,9 @@ const fs = require("fs").promises;
 
 module.exports = async function serveNextAt(uri, options = {}) {
   // Parse scheme
-  const [, scheme, host] = uri.match(/^([\w-]*):\/\/(.*)$/i);
+  const urlObj = new URL(uri);
+  const host = urlObj.host;
+  const scheme = urlObj.protocol.replace(/:$/, "");
 
   // Configure defaults
   const {
@@ -13,22 +15,8 @@ module.exports = async function serveNextAt(uri, options = {}) {
     dev = !app.isPackaged,
     outputDir = "./out",
     partition,
+    logger = createLogger("next-electron-server"),
   } = options;
-
-  // Validate
-  if (!scheme) {
-    const error = new Error(
-      `next-electron-server - Invalid scheme: ${scheme} (${uri})`
-    );
-    throw error;
-  }
-
-  if (!host) {
-    const error = new Error(
-      `next-electron-server - Invalid host: ${host} (${uri})`
-    );
-    throw error;
-  }
 
   // Register scheme
   protocol.registerSchemesAsPrivileged([
@@ -60,10 +48,8 @@ module.exports = async function serveNextAt(uri, options = {}) {
       }
 
       // Development: Serve Next.js using a proxy pointing the localhost:3000
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        "next-electron-server",
-        `- Serving files via ${scheme}://${host} from http://localhost:${port}`
+      logger.log(
+        `Serving files via ${scheme}://${host} from http://localhost:${port}`
       );
 
       protocol.registerStreamProtocol(scheme, (request, next) => {
@@ -78,11 +64,8 @@ module.exports = async function serveNextAt(uri, options = {}) {
         if (
           patchedRequest.url.includes(`:${port}/_next/static/chunks/webpack.js`)
         ) {
-          console.log(
-            "\x1b[33m%s\x1b[0m",
-            "next-electon-server",
-            "- Patching _next/static/chunks/webpack.js"
-          );
+          logger.log("Patching _next/static/chunks/webpack.js");
+
           return cloneAndRetryRequest(patchedRequest, (response) => {
             const { PassThrough } = require("stream");
             const stream = new PassThrough();
@@ -151,11 +134,7 @@ function cloneAndRetryRequest(options, next) {
     .on("error", async (error) => {
       // Lets wait for the Next.js devserver to start
       if (error.code === "ECONNREFUSED") {
-        console.log(
-          "\x1b[33m%s\x1b[0m",
-          "next-electron-server",
-          "- Waiting for Next.js DevServer"
-        );
+        logger.log("Waiting for Next.js DevServer");
 
         // Next devserver is not ready yet, lets wait for it
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -182,4 +161,12 @@ async function resolvePath(pth) {
       return resolvePath(path.join(cleanedPath, "index.html"));
     }
   } catch (_) {}
+}
+
+function createLogger(namespace) {
+  return new Proxy(console, {
+    get(target, key) {
+      return target[key].bind(target, "\x1b[33m%s\x1b[0m", namespace, "-");
+    },
+  });
 }

@@ -40,6 +40,13 @@ interface Options {
    * @default electron.session.defaultSession
    */
   partition?: string;
+
+  /**
+   * The logger to use
+   */
+  logger?: {
+    log(...args: unknown[]): void;
+  };
 }
 
 declare function serveNextAt(uri: string, options?: Options): void;
